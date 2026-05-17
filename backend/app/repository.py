@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import re
+import unicodedata
+
 from .database import get_connection, json_dump, json_load
 from .schemas import ReferenceIn
 
@@ -31,6 +34,148 @@ def replace_associations(conn, reference_id: int, associations: list[str]) -> No
 
 def clean_list(values: list[str]) -> list[str]:
     return [value.strip() for value in values if value and value.strip()]
+
+
+def normalize_search_text(value: str) -> str:
+    value = value.replace("œ", "oe").replace("Œ", "OE").replace("æ", "ae").replace("Æ", "AE")
+    without_accents = "".join(
+        char for char in unicodedata.normalize("NFKD", value.lower())
+        if not unicodedata.combining(char)
+    )
+    normalized = re.sub(r"[^a-z0-9]+", " ", without_accents)
+    return re.sub(r"\s+", " ", normalized).strip()
+
+
+def compact_digits(value: str) -> str:
+    return re.sub(r"\D+", "", value)
+
+
+def searchable_blob(item: dict) -> str:
+    document_text = " ".join(doc.get("ocr_text", "") for doc in item.get("documents", []))
+    values = [
+        item.get("title", ""),
+        item.get("category", ""),
+        item.get("description", ""),
+        item.get("numeric_refs", ""),
+        " ".join(item.get("subcategories", [])),
+        " ".join(item.get("tags", [])),
+        " ".join(item.get("associations", [])),
+        item.get("notes", ""),
+        document_text,
+    ]
+    return " ".join(values)
+
+
+def score_reference(item: dict, query: str) -> int:
+    normalized_query = normalize_search_text(query)
+    if not normalized_query:
+        return 1
+
+    document_blob = " ".join(doc.get("ocr_text", "") for doc in item.get("documents", []))
+    normalized_blob = normalize_search_text(searchable_blob(item))
+    normalized_title = normalize_search_text(item.get("title", ""))
+    normalized_category = normalize_search_text(item.get("category", ""))
+    normalized_tags = normalize_search_text(" ".join(item.get("tags", [])))
+    normalized_subcategories = normalize_search_text(" ".join(item.get("subcategories", [])))
+    normalized_associations = normalize_search_text(" ".join(item.get("associations", [])))
+    normalized_primary_codes = normalize_search_text(item.get("numeric_refs", ""))
+    normalized_notes = normalize_search_text(item.get("notes", ""))
+    normalized_documents = normalize_search_text(document_blob)
+    compact_query = compact_digits(query)
+    compact_primary_codes = compact_digits(item.get("numeric_refs", ""))
+    compact_notes = compact_digits(item.get("notes", ""))
+    compact_documents = compact_digits(document_blob)
+    tokens = normalized_query.split()
+    words = normalized_blob.split()
+    title_words = normalized_title.split()
+    score = 0
+
+    if normalized_title == normalized_query:
+        score += 700
+    if normalized_title.startswith(normalized_query):
+        score += 500
+    if normalized_query in normalized_title:
+        score += 350
+    if tokens and all(any(word.startswith(token) for word in title_words) for token in tokens):
+        score += 620
+    if normalized_query in normalized_category:
+        score += 220
+    if normalized_query in normalized_tags:
+        score += 260
+    if normalized_query in normalized_subcategories:
+        score += 240
+    if normalized_query in normalized_associations:
+        score += 200
+    for normalized_field, field_boost in (
+        (normalized_tags, 280),
+        (normalized_subcategories, 260),
+        (normalized_associations, 220),
+    ):
+        field_words = normalized_field.split()
+        if tokens and all(any(word.startswith(token) for word in field_words) for token in tokens):
+            score += field_boost
+    if any(token.isdigit() for token in tokens):
+        if normalized_query in normalized_primary_codes:
+            score += 1100
+        elif normalized_query in normalized_notes:
+            score += 520
+        elif normalized_query in normalized_documents:
+            score += 160
+    if compact_query and len(compact_query) >= 2:
+        if compact_primary_codes.startswith(compact_query):
+            score += 1200
+        elif compact_query in compact_primary_codes:
+            score += 850
+        elif compact_query in compact_notes:
+            score += 420
+        elif compact_query in compact_documents:
+            score += 130
+    if normalized_query in normalized_blob:
+        score += 180
+
+    matched_tokens = 0
+    for token in tokens:
+        if any(word.startswith(token) for word in words):
+            matched_tokens += 1
+            score += 35
+    if tokens and matched_tokens == len(tokens):
+        score += 160
+    elif tokens and matched_tokens:
+        score += matched_tokens * 10
+
+    return score
+
+
+def build_match_context(item: dict, query: str) -> str:
+    normalized_query = normalize_search_text(query)
+    compact_query = compact_digits(query)
+    tokens = normalized_query.split()
+    candidates = []
+    candidates.extend(item.get("subcategories", []))
+    candidates.extend(item.get("associations", []))
+    candidates.append(item.get("numeric_refs", ""))
+    candidates.extend((item.get("notes", "") or "").splitlines())
+    for doc in item.get("documents", []):
+        candidates.extend((doc.get("ocr_text", "") or "").splitlines())
+
+    best = ""
+    best_score = 0
+    for line in candidates:
+        clean = " ".join(line.split())
+        if not clean:
+            continue
+        normalized_line = normalize_search_text(clean)
+        compact_line = compact_digits(clean)
+        line_score = 0
+        if normalized_query and normalized_query in normalized_line:
+            line_score += 20
+        if compact_query and compact_query in compact_line:
+            line_score += 18
+        line_score += sum(1 for token in tokens if any(word.startswith(token) for word in normalized_line.split()))
+        if line_score > best_score:
+            best = clean
+            best_score = line_score
+    return best[:260]
 
 
 def create_reference(payload: ReferenceIn) -> dict:
@@ -206,6 +351,20 @@ def search_references(query: str) -> list[dict]:
     tokens = [token.replace('"', "") for token in q.split() if token.strip()]
     fts_query = " OR ".join(f'"{token}"*' for token in tokens)
     with get_connection() as conn:
+        all_ids = conn.execute('SELECT id FROM "references"').fetchall()
+        all_items = [get_reference_by_id(int(row["id"]), conn) for row in all_ids]
+        scored_items = []
+        for item in all_items:
+            if not item:
+                continue
+            score = score_reference(item, q)
+            if score > 0:
+                item["match_context"] = build_match_context(item, q)
+                scored_items.append((score, item["title"], item))
+        if scored_items:
+            scored_items.sort(key=lambda row: (-row[0], row[1]))
+            return [item for _, _, item in scored_items[:50]]
+
         try:
             rows = conn.execute(
                 """

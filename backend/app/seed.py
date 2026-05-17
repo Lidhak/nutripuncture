@@ -324,6 +324,55 @@ SAMPLES = [
     ),
 ]
 
+FINE_REFERENCES = [
+    # Memoire du sang / circulation lymphatique
+    ("A - SANG IDENTITÉ", "Mémoires du sang", "30 01 32 13 37 AC 15 04 27 34 08", "scan_memoires_du_sang.jpeg", "Sang identité. F: 30 01 32 13 37 AC 15 04 27 34 08. H: 30 01 32 13 38 AC 15 04 27 34 08.", ["sang", "identité", "mémoire"], ["MÉMOIRES DU SANG"]),
+    ("AA - SANG DÉTOXICATION", "Mémoires du sang", "35 01 11 37 30 AC 30 26 37 34 08", "scan_memoires_du_sang.jpeg", "Sang détoxication. F: 35 01 11 37 30 AC 30 26 37 34 08. H: 36 01 11 38 30 AC 30 26 38 34 08.", ["sang", "détoxication", "detoxication"], ["MÉMOIRES DU SANG"]),
+    ("SANG PLACENTAIRE", "Mémoires du sang", "12 22 37 08 30 AC 04 22 08 09 23", "scan_memoires_du_sang.jpeg", "Sang placentaire. F: 12 22 37 08 30 AC 04 22 08 09 23. H: 12 22 38 08 30 AC 04 22 08 09 23.", ["sang", "placentaire"], ["MÉMOIRES DU SANG"]),
+    ("SANG UNITAIRE FAMILIAL", "Mémoires du sang", "11 03 08 34 19 AC 11 19 26 15 28", "scan_memoires_du_sang.jpeg", "Sang unitaire familial. F: 11 03 08 34 19 AC 11 19 26 15 28. H: 11 03 08 34 19 AC 11 19 26 15 21.", ["sang", "familial", "unitaire"], ["MÉMOIRES DU SANG"]),
+    ("SANG LIMITES ENDO-YEUX", "Mémoires du sang", "28 30 26 37 23 AC 08 12 25 33 30", "scan_memoires_du_sang.jpeg", "Sang limites endo-yeux. F: 28 30 26 37 23 AC 08 12 25 33 30. H: 21 30 26 38 23 AC 08 12 25 33 30.", ["sang", "limites", "endo-yeux", "yeux"], ["MÉMOIRES DU SANG"]),
+    ("SANG DE LA MOELLE", "Mémoires du sang", "23 04 11 30 35 AC 16 26 04 17 03", "scan_memoires_du_sang.jpeg", "Sang de la moelle. F: 23 04 11 30 35 AC 16 26 04 17 03. H: 23 04 11 30 36 AC 16 26 04 17 03.", ["sang", "moelle"], ["MÉMOIRES DU SANG"]),
+    ("POMPING OUT VEINE", "Mémoires du sang", "16 09 30 15 24 AC 20 34 12 28 08", "scan_memoires_du_sang.jpeg", "Pumping out veine. F: 16 09 30 15 24 AC 20 34 12 28 08. H: 16 09 30 15 14 AC 20 34 12 21 08.", ["pumping", "pumping out", "out", "veine", "sang"], ["MÉMOIRES DU SANG"]),
+    ("POMPING INN ARTÈRE", "Mémoires du sang", "05 37 28 23 30 AC 12 24 04 09 16", "scan_memoires_du_sang.jpeg", "Pumping inn artère. F: 05 37 28 23 30 AC 12 24 04 09 16. H: 05 38 21 23 30 AC 12 14 04 09 16.", ["pumping", "pumping inn", "inn", "artère", "artere", "sang"], ["MÉMOIRES DU SANG"]),
+    ("REFUS HÉRITAGE", "Mémoires du sang", "30 37 04 24 13 AC 11 04 08 27 18", "scan_memoires_du_sang.jpeg", "Refus héritage, origine corps. F: 30 37 04 24 13 AC 11 04 08 27 18. H: 30 38 04 14 13 AC 11 04 08 27 18.", ["héritage", "heritage", "origine", "corps"], ["MÉMOIRES DU SANG"]),
+    ("CIRCULATION LYMPHATIQUE", "Circulation lymphatique", "29 15 11 37 30 AC 27 15 16 34 25", "scan_memoires_du_sang.jpeg", "Circulation lymphatique. F: 29 15 11 37 30 AC 27 15 16 34 25. H: 29 15 11 38 30 AC 27 15 16 34 25.", ["lymphatique", "circulation", "sang"], ["MÉMOIRES DU SANG"]),
+    ("LYMPHATIQUES BOUCHE", "Circulation lymphatique", "15 37 33 28 10 AC 15 29 37 10 08", "scan_memoires_du_sang.jpeg", "Lymphatiques bouche. F: 15 37 33 28 10 AC 15 29 37 10 08. H: 15 38 33 21 10 AC 15 29 38 10 08.", ["lymphatique", "bouche"], ["MÉMOIRES DU SANG"]),
+    ("LYMPHATIQUES IDENTITÉ", "Circulation lymphatique", "25 15 33 24 07 AC 25 05 15 12 13", "scan_memoires_du_sang.jpeg", "Lymphatiques identité. F: 25 15 33 24 07 AC 25 05 15 12 13. H: 25 15 33 14 06 AC 25 05 15 12 13.", ["lymphatique", "identité", "sang"], ["MÉMOIRES DU SANG"]),
+
+    # Sonars
+    ("CERVEAU ÉTHÉRIQUE", "Oscillateurs fondamentaux", "35/36 27 08 30 02 AC 03 09 16 08 02", "scan_sonars_oscillateurs.jpeg", "Cerveau éthérique. 35/36 27 08 30 02. AC 03 09 16 08 02.", ["cerveau", "éthérique", "etherique", "sonar"], ["SONAR ÉPIPHYSAIRE"]),
+    ("SONAR THORACIQUE", "Oscillateurs fondamentaux", "04 01 32 27 24/14 AC 23 26 27 09 29", "scan_sonars_oscillateurs.jpeg", "Sonar thoracique. 04 01 32 27 24/14. AC 23 26 27 09 29.", ["sonar", "thoracique", "rythmes"], ["SONAR ÉPIPHYSAIRE"]),
+    ("CŒUR ÉTHÉRIQUE", "Oscillateurs fondamentaux", "35/36 34 37/38 33 30 AC 16 08 04 35/36 27", "scan_sonars_oscillateurs.jpeg", "Cœur éthérique. 35/36 34 37/38 33 30. AC 16 08 04 35/36 27.", ["coeur", "cœur", "éthérique", "etherique"], ["SONAR ÉPIPHYSAIRE"]),
+    ("ROUE IRACIK", "Oscillateurs fondamentaux", "31 27 04 34 03 AC 31 09 23 08 32", "scan_sonars_oscillateurs.jpeg", "Roue Iracik. 31 27 04 34 03 AC 31 09 23 08 32.", ["roue", "iracik", "sonar"], ["SONAR ÉPIPHYSAIRE"]),
+    ("SONAR PELVIEN", "Oscillateurs fondamentaux", "11 04 28/21 33/36 AC 27 28/21 07/06 03 08", "scan_sonars_oscillateurs.jpeg", "Sonar pelvien. 11 04 28/21 33/36. AC 27 28/21 07/06 03 08.", ["sonar", "pelvien", "métabolique"], ["SONAR ÉPIPHYSAIRE"]),
+    ("FOIE ÉTHÉRIQUE", "Oscillateurs fondamentaux", "11 22 35/36 02 15 AC 11 18 03 16 23", "scan_sonars_oscillateurs.jpeg", "Foie éthérique. 11 22 35/36 02 15. AC 11 18 03 16 23.", ["foie", "éthérique", "etherique", "sonar"], ["SONAR ÉPIPHYSAIRE"]),
+
+    # Terrain intestinal / neurotransmetteurs
+    ("SOI DE L'AMYGDALE", "Terrain intestinal et neurotransmetteurs", "13 19 35/36 24/14 07/06 AC 17 10 09 04 32", "scan_terrain_intestinal_neurotransmetteurs.jpeg", "Soi de l'amygdale. 13 19 35/36 24/14 07/06. AC 17 10 09 04 32.", ["amygdale", "limbique", "neurotransmetteurs"], ["TEST PRÉPROBIO"]),
+    ("AMYGDALE", "Terrain intestinal et neurotransmetteurs", "03 05 31 25 07/06 AC 05 08 02 12 26", "scan_terrain_intestinal_neurotransmetteurs.jpeg", "Amygdale. 03 05 31 25 07/06. AC 05 08 02 12 26.", ["amygdale", "cerveau", "limbique"], ["TEST PRÉPROBIO", "CERVEAU ENTÉRIQUE"]),
+    ("COMMANDE LIMBIQUE", "Terrain intestinal et neurotransmetteurs", "34 18 13 31 09 AC 31 02 12 33 26", "scan_terrain_intestinal_neurotransmetteurs.jpeg", "Commande limbique. 34 18 13 31 09. AC 31 02 12 33 26.", ["commande", "limbique", "cerveau"], ["TEST PRÉPROBIO", "CERVEAU ENTÉRIQUE"]),
+    ("PLAQUE DE PEYER", "Terrain intestinal et neurotransmetteurs", "35/36 05 13 37/38 27 AC 34 13 33 12 08", "scan_terrain_intestinal_neurotransmetteurs.jpeg", "Plaque de Peyer. 35/36 05 13 37/38 27. AC 34 13 33 12 08.", ["plaque", "peyer", "intestin", "immunité"], ["TEST PRÉPROBIO"]),
+    ("LYMPHOCYTES LIE", "Terrain intestinal et neurotransmetteurs", "05 15 35/36 13 12 AC 35/36 05 12 13 37/38", "scan_terrain_intestinal_neurotransmetteurs.jpeg", "Lymphocytes LIE. 05 15 35/36 13 12. AC 35/36 05 12 13 37/38.", ["lymphocytes", "intestin", "immunité"], ["TEST PRÉPROBIO"]),
+    ("PREMIÈRE MATRICE MATERNELLE GROSSESSE", "Terrain intestinal et neurotransmetteurs", "09 24/14 37/38 19 33 AC 37/38 27 04 34 31", "scan_terrain_intestinal_neurotransmetteurs.jpeg", "Première matrice maternelle grossesse. 09 24/14 37/38 19 33. AC 37/38 27 04 34 31.", ["matrice", "maternelle", "grossesse"], ["TEST PRÉPROBIO"]),
+    ("INTERACTION SYSTÈME MÉTABOLIQUE SANGUIN", "Terrain intestinal et neurotransmetteurs", "31 17 34 09 22 AC 27 19 02 32 24/14", "scan_terrain_intestinal_neurotransmetteurs.jpeg", "Interaction avec le système métabolique sanguin. 31 17 34 09 22 AC 27 19 02 32 24/14.", ["métabolique", "sanguin", "sang", "placentaire"], ["TEST PRÉPROBIO", "MÉMOIRES DU SANG"]),
+
+    # Structure / fascia
+    ("SPHÉNOÏDE", "Ostéopathie structurelle", "35 37 32 33 34 AC 27 26 17 16 08", "scan_colonne_mouvements_fascia.jpeg", "Sphénoïde. F: 35 37 32 33 34 AC 27 26 17 16 08. H: 36 38 32 33 34 AC 27 26 17 16 08.", ["sphénoïde", "crâne"], ["COLONNE VERTÉBRALE"]),
+    ("ETHMOÏDE", "Ostéopathie structurelle", "07 17 25 30 37 AC 07 12 30 15 08", "scan_colonne_mouvements_fascia.jpeg", "Ethmoïde. F: 07 17 25 30 37 AC 07 12 30 15 08. H: 06 17 25 30 38 AC 06 12 30 15 08.", ["ethmoïde", "crâne"], ["COLONNE VERTÉBRALE"]),
+    ("PUBIS", "Ostéopathie structurelle", "33 17 07 19 31 AC 07 17 05 25 12", "scan_colonne_mouvements_fascia.jpeg", "Pubis. F: 33 17 07 19 31 AC 07 17 05 25 12. H: 33 17 07 19 31 AC 06 17 05 25 12.", ["pubis", "bassin"], ["COLONNE VERTÉBRALE"]),
+    ("DISQUES INTERVERTÉBRAUX", "Ostéopathie structurelle", "19 02 16 34 09 AC 02 16 34 08 17", "scan_colonne_mouvements_fascia.jpeg", "Disques intervertébraux. F/H: 19 02 16 34 09 AC 02 16 34 08 17.", ["disques", "intervertébraux", "colonne"], ["COLONNE VERTÉBRALE"]),
+    ("ATLAS-AXIS", "Ostéopathie structurelle", "26 33 34 30 02 AC 08 31 19 16 34", "scan_colonne_mouvements_fascia.jpeg", "Atlas-axis. F: 26 33 34 30 02 AC 08 31 19 16 34. H: 26 38 34 30 02 AC 08 31 19 16 34.", ["atlas", "axis", "colonne"], ["COLONNE VERTÉBRALE"]),
+    ("SACRUM", "Ostéopathie structurelle", "17 11 28 34 30 AC 17 28 08 34 26", "scan_colonne_mouvements_fascia.jpeg", "Sacrum. F: 17 11 28 34 30 AC 17 28 08 34 26. H: 17 11 21 34 30 AC 17 21 08 34 26.", ["sacrum", "colonne", "bassin"], ["COLONNE VERTÉBRALE"]),
+    ("VERTÈBRES CERVICALES", "Ostéopathie structurelle", "34 17 37 16 27 AC 27 02 04 34 08", "scan_colonne_mouvements_fascia.jpeg", "Vertèbres cervicales. F: 34 17 37 16 27 AC 27 02 04 34 08. H: 34 17 38 16 27 AC 27 02 04 34 08.", ["vertèbres", "cervicales", "colonne"], ["COLONNE VERTÉBRALE"]),
+    ("VERTÈBRES DORSALES", "Ostéopathie structurelle", "34 17 15 04 20 AC 31 17 16 04 20", "scan_colonne_mouvements_fascia.jpeg", "Vertèbres dorsales. F/H: 34 17 15 04 20 AC 31 17 16 04 20.", ["vertèbres", "dorsales", "colonne"], ["COLONNE VERTÉBRALE"]),
+    ("VERTÈBRES LOMBAIRES", "Ostéopathie structurelle", "34 17 31 02 09 AC 16 31 17 34 37", "scan_colonne_mouvements_fascia.jpeg", "Vertèbres lombaires. F: 34 17 31 02 09 AC 16 31 17 34 37. H: 34 17 31 02 09 AC 16 31 17 34 38.", ["vertèbres", "lombaires", "colonne"], ["COLONNE VERTÉBRALE"]),
+    ("FASCIA LINGUAL", "Mouvements archétypaux", "19 16 18 15 26", "scan_colonne_mouvements_fascia.jpeg", "Fasciale 1 lingual. F/H: 19 16 18 15 26.", ["fascia", "fasciale", "lingual"], ["MOUVEMENTS ARCHÉTYPAUX"]),
+    ("FASCIA MÉDIAN", "Mouvements archétypaux", "19 16 15 07 30", "scan_colonne_mouvements_fascia.jpeg", "Fasciale 2 médian. F: 19 16 15 07 30. H: 19 16 15 06 30.", ["fascia", "fasciale", "médian"], ["MOUVEMENTS ARCHÉTYPAUX"]),
+    ("FASCIA POSTÉRIEUR", "Mouvements archétypaux", "16 19 15 31 09", "scan_colonne_mouvements_fascia.jpeg", "Fasciale 3 postérieur. F/H: 16 19 15 31 09.", ["fascia", "fasciale", "postérieur"], ["MOUVEMENTS ARCHÉTYPAUX"]),
+    ("FASCIA ANTÉRO-LATÉRAL", "Mouvements archétypaux", "09 24 15 37 27", "scan_colonne_mouvements_fascia.jpeg", "Fasciale 4 antéro-latéral. F: 09 24 15 37 27. H: 09 14 15 38 27.", ["fascia", "fasciale", "antéro-latéral"], ["MOUVEMENTS ARCHÉTYPAUX"]),
+    ("FASCIA POSTÉRO-LATÉRAL", "Mouvements archétypaux", "16 33 15 37 30", "scan_colonne_mouvements_fascia.jpeg", "Fasciale 5 postéro-latéral. F: 16 33 15 37 30. H: 16 33 15 38 30.", ["fascia", "fasciale", "postéro-latéral"], ["MOUVEMENTS ARCHÉTYPAUX"]),
+]
+
 DOCUMENTS = {
     "TEST PRÉPROBIO": [("scan_terrain_intestinal_neurotransmetteurs.jpeg", TERRAIN_INTESTINAL_TEXT)],
     "CERVEAU ENTÉRIQUE": [("scan_terrain_intestinal_neurotransmetteurs.jpeg", TERRAIN_INTESTINAL_TEXT)],
@@ -360,6 +409,20 @@ def seed() -> None:
         seeded.append(reference["id"])
         for fixture_name, text in DOCUMENTS.get(sample.title, []):
             install_fixture_document(reference["id"], fixture_name, text)
+    for title, category, numeric_refs, fixture_name, text, tags, associations in FINE_REFERENCES:
+        reference = upsert_reference(
+            ReferenceIn(
+                title=title,
+                category=category,
+                description=f"Entrée indexée depuis le scan source {fixture_name}.",
+                numeric_refs=numeric_refs,
+                subcategories=[title],
+                tags=tags + ["scan", "documentation praticien"],
+                associations=associations,
+                notes=text,
+            )
+        )
+        install_fixture_document(reference["id"], fixture_name, text)
     if not list_references():
         raise RuntimeError("Seed impossible: aucune fiche creee")
 

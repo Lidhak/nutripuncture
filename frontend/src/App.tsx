@@ -202,7 +202,7 @@ export function App() {
                 <Input
                   className="h-16 rounded-lg border-slate-200 bg-slate-50 pl-12 text-lg shadow-inner focus:bg-white"
                   autoFocus
-                  placeholder="microbiote, sang, atlas, 15 11 05, commande limbique..."
+                  placeholder="Début de code, organe, fiche, tag... ex: 31 17 34, foie, atlas, amygdale"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                 />
@@ -237,6 +237,11 @@ export function App() {
                           <Badge key={tag}>{tag}</Badge>
                         ))}
                       </div>
+                      {item.match_context && (
+                        <p className="mt-3 line-clamp-2 rounded-md bg-white/70 px-2 py-1.5 text-xs leading-5 text-slate-500">
+                          {item.match_context}
+                        </p>
+                      )}
                     </button>
                   ))}
                 </div>

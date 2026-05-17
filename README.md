@@ -22,6 +22,12 @@ src-tauri/     Packaging desktop Tauri
 scripts/       Lancement local
 ```
 
+## Notes projet
+
+- `note_utilisateur_rapide.md` : procédure courte pour lancer et utiliser le POC.
+- `synthese_prompt.md` : synthèse du besoin produit et technique.
+- `note_de_carage.md` : cadrage plus large du projet et de ses évolutions IA.
+
 ## Lancement rapide
 
 Tout lancer en une commande:

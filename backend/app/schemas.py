@@ -17,6 +17,7 @@ class ReferenceIn(BaseModel):
 class ReferenceOut(ReferenceIn):
     id: int
     documents: list[dict] = []
+    match_context: str = ""
 
 
 class UploadResponse(BaseModel):

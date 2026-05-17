@@ -11,6 +11,7 @@ export type ReferenceItem = {
   associations: string[];
   notes: string;
   documents: DocumentItem[];
+  match_context: string;
 };
 
 export type DocumentItem = {
@@ -22,7 +23,7 @@ export type DocumentItem = {
   created_at: string;
 };
 
-export type ReferencePayload = Omit<ReferenceItem, "id" | "documents">;
+export type ReferencePayload = Omit<ReferenceItem, "id" | "documents" | "match_context">;
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
