@@ -1,0 +1,8 @@
+{
+  "name": "nutripuncture-desk-workspace",
+  "private": true,
+  "scripts": {
+    "backend": "bash scripts/start_backend.sh",
+    "frontend": "bash scripts/start_frontend.sh"
+  }
+}
