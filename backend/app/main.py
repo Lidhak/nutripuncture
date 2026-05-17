@@ -17,9 +17,10 @@ from .repository import (
     get_reference,
     list_references,
     search_references,
+    update_document_ocr,
     update_reference,
 )
-from .schemas import ReferenceIn, ReferenceOut, UploadResponse
+from .schemas import DocumentOcrUpdate, ReferenceIn, ReferenceOut, UploadResponse
 from .seed import seed
 
 app = FastAPI(title="Nutripuncture Desk API", version="0.1.0")
@@ -93,17 +94,30 @@ def upload_document(
     stored_path = UPLOAD_DIR / stored_name
     with stored_path.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    ocr_text = extract_text(stored_path, file.content_type or "")
+    ocr = extract_text(stored_path, file.content_type or "")
     doc_id = attach_document(
         reference_id=reference_id,
         filename=file.filename or stored_name,
         stored_path=f"/uploads/{stored_name}",
         mime_type=file.content_type or "",
-        ocr_text=ocr_text,
+        ocr_text=ocr.text,
+        ocr_status=ocr.status,
+        ocr_engine=ocr.engine,
     )
     return {
         "document_id": doc_id,
         "filename": file.filename or stored_name,
         "stored_path": f"/uploads/{stored_name}",
-        "ocr_text": ocr_text,
+        "ocr_text": ocr.text,
+        "ocr_status": ocr.status,
+        "ocr_engine": ocr.engine,
+        "character_count": len(ocr.text),
     }
+
+
+@app.put("/documents/{document_id}/ocr")
+def correct_document_ocr(document_id: int, payload: DocumentOcrUpdate) -> dict:
+    item = update_document_ocr(document_id, payload.ocr_text)
+    if not item:
+        raise HTTPException(status_code=404, detail="Document introuvable")
+    return item

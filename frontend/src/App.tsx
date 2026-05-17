@@ -1,7 +1,9 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import {
   Activity,
+  AlertCircle,
   Brain,
+  CheckCircle2,
   FileText,
   Layers3,
   Link2,
@@ -13,8 +15,8 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { API_URL, ReferenceItem, ReferencePayload, api } from "./lib/api";
-import { Badge, Button, IconButton, Input, Panel, Textarea } from "./components/ui";
+import { API_URL, ReferenceItem, ReferencePayload, UploadResult, api } from "./lib/api";
+import { Badge, Button, Input, Panel, Textarea } from "./components/ui";
 import { cn } from "./lib/utils";
 
 const emptyForm: ReferencePayload = {
@@ -47,6 +49,8 @@ export function App() {
   const [form, setForm] = useState<ReferencePayload>(emptyForm);
   const [status, setStatus] = useState("Pret");
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpload, setLastUpload] = useState<UploadResult | null>(null);
+  const [reviewText, setReviewText] = useState("");
 
   const selected = useMemo(
     () => items.find((item) => item.id === selectedId) ?? items[0],
@@ -124,12 +128,25 @@ export function App() {
     if (!file) return;
     setStatus("OCR en cours...");
     try {
-      await api.upload(file, selected?.id);
+      const result = await api.upload(file, selected?.id);
+      setLastUpload(result);
+      setReviewText(result.ocr_text);
       await refresh(selected?.id);
-      setStatus("Document indexe");
+      setStatus(result.ocr_status === "ok" ? "Document indexe" : "OCR a verifier");
     } catch {
       setStatus("Upload impossible");
+    } finally {
+      event.target.value = "";
     }
+  }
+
+  async function saveReviewedOcr() {
+    if (!lastUpload) return;
+    setStatus("Correction OCR...");
+    await api.updateOcr(lastUpload.document_id, reviewText);
+    setLastUpload({ ...lastUpload, ocr_text: reviewText, ocr_status: "corrected", ocr_engine: "manual", character_count: reviewText.length });
+    await refresh(selected?.id);
+    setStatus("Texte OCR corrige et indexe");
   }
 
   return (
@@ -256,6 +273,10 @@ export function App() {
                     onSubmit={submit}
                     onDelete={removeSelected}
                     onUpload={upload}
+                    lastUpload={lastUpload}
+                    reviewText={reviewText}
+                    setReviewText={setReviewText}
+                    onSaveReviewedOcr={saveReviewedOcr}
                   />
                 ) : (
                   <ReferenceView selected={selected} />
@@ -342,7 +363,12 @@ function ReferenceView({ selected }: { selected?: ReferenceItem }) {
                       loading="lazy"
                     />
                   )}
-                  <span className="font-medium text-slate-800">{doc.filename}</span>
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="truncate font-medium text-slate-800">{doc.filename}</span>
+                    <Badge tone={doc.ocr_status === "ok" || doc.ocr_status === "corrected" ? "green" : "slate"}>
+                      {doc.ocr_status || "ocr"}
+                    </Badge>
+                  </span>
                   <span className="mt-1 block line-clamp-2 text-xs text-slate-500">{doc.ocr_text || "OCR sans texte extrait"}</span>
                 </a>
               ))}
@@ -386,6 +412,10 @@ function AdminPanel({
   onSubmit,
   onDelete,
   onUpload,
+  lastUpload,
+  reviewText,
+  setReviewText,
+  onSaveReviewedOcr,
 }: {
   form: ReferencePayload;
   setForm: (form: ReferencePayload) => void;
@@ -393,7 +423,18 @@ function AdminPanel({
   onSubmit: (event: FormEvent) => void;
   onDelete: () => void;
   onUpload: (event: ChangeEvent<HTMLInputElement>) => void;
+  lastUpload: UploadResult | null;
+  reviewText: string;
+  setReviewText: (value: string) => void;
+  onSaveReviewedOcr: () => void;
 }) {
+  const uploadLooksGood = lastUpload?.ocr_status === "ok" || lastUpload?.ocr_status === "corrected";
+  const [deleteConfirming, setDeleteConfirming] = useState(false);
+
+  useEffect(() => {
+    setDeleteConfirming(false);
+  }, [selected?.id]);
+
   return (
     <form className="animate-enter space-y-5 p-5 md:p-7" onSubmit={onSubmit}>
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -402,11 +443,6 @@ function AdminPanel({
           <p className="mt-1 text-sm text-slate-500">Ajout, modification, upload et indexation OCR.</p>
         </div>
         <div className="flex gap-2">
-          {selected && (
-            <IconButton type="button" title="Supprimer" onClick={onDelete}>
-              <Trash2 size={16} />
-            </IconButton>
-          )}
           <Button type="submit" className="border-blue-200 bg-blue-600 text-white hover:bg-blue-700 hover:text-white">
             <Save size={16} />
             Enregistrer
@@ -450,6 +486,37 @@ function AdminPanel({
         <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
       </Field>
 
+      {selected && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-red-800">
+                <Trash2 size={17} />
+                Suppression de fiche
+              </div>
+              <p className="mt-1 text-sm text-red-700">
+                Supprime la fiche selectionnee, ses tags, associations et son index de recherche.
+              </p>
+            </div>
+            {deleteConfirming ? (
+              <div className="flex gap-2">
+                <Button type="button" onClick={() => setDeleteConfirming(false)}>
+                  Annuler
+                </Button>
+                <Button type="button" className="border-red-300 bg-red-600 text-white hover:border-red-400 hover:bg-red-700 hover:text-white" onClick={onDelete}>
+                  Confirmer
+                </Button>
+              </div>
+            ) : (
+              <Button type="button" className="border-red-200 text-red-700 hover:border-red-300 hover:bg-red-100 hover:text-red-800" onClick={() => setDeleteConfirming(true)}>
+                <Trash2 size={16} />
+                Supprimer la fiche
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="rounded-lg border border-dashed border-blue-200 bg-blue-50/50 p-5">
         <label className="flex cursor-pointer flex-col items-center justify-center gap-2 text-center text-sm text-blue-700">
           <Upload size={22} />
@@ -457,6 +524,40 @@ function AdminPanel({
           <input className="hidden" type="file" accept="image/*,.pdf" onChange={onUpload} />
         </label>
       </div>
+
+      {lastUpload && (
+        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                {uploadLooksGood ? <CheckCircle2 className="text-emerald-600" size={18} /> : <AlertCircle className="text-amber-600" size={18} />}
+                Controle OCR
+              </div>
+              <p className="mt-1 truncate text-sm text-slate-500">{lastUpload.filename}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge tone={uploadLooksGood ? "green" : "blue"}>{lastUpload.ocr_status}</Badge>
+              <Badge>{lastUpload.ocr_engine || "OCR"}</Badge>
+              <Badge>{reviewText.length} caracteres</Badge>
+            </div>
+          </div>
+          <Textarea
+            className="mt-4 min-h-48 font-mono text-xs leading-5"
+            value={reviewText}
+            onChange={(event) => setReviewText(event.target.value)}
+            placeholder="Le texte extrait apparait ici. Corrigez les erreurs importantes puis enregistrez pour mettre a jour la recherche."
+          />
+          <div className="mt-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <p className="text-xs text-slate-500">
+              Ce texte est stocke dans SQLite et reinjecte dans l'index de recherche apres correction.
+            </p>
+            <Button type="button" onClick={onSaveReviewedOcr}>
+              <Save size={16} />
+              Enregistrer OCR
+            </Button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

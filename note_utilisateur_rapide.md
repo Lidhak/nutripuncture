@@ -20,11 +20,15 @@ cd /home/depot-github/nutripuncture
 bash scripts/start_app.sh
 ```
 
-Ouvrir ensuite :
+Le navigateur s'ouvre automatiquement sur `http://127.0.0.1:5173`.
 
-```text
-http://127.0.0.1:5173
+Pour installer un bouton dans le menu des applications Linux :
+
+```bash
+bash scripts/create_desktop_launcher.sh
 ```
+
+Ensuite, lancer `Nutripuncture Desk` depuis le menu, comme une application classique.
 
 L'API locale FastAPI tourne sur :
 
@@ -58,12 +62,24 @@ Exemples de recherches utiles :
 
 Conseil : ajouter plusieurs tags simples pour faciliter la recherche future.
 
+## Supprimer une fiche
+
+1. Sélectionner la fiche à supprimer.
+2. Aller dans `Admin`.
+3. Utiliser le bloc `Suppression de fiche`.
+4. Cliquer sur `Supprimer la fiche`.
+5. Cliquer sur `Confirmer`.
+
+La fiche est retirée de la base et de l'index de recherche local.
+
 ## Ajouter un scan ou un PDF
 
 1. Sélectionner une fiche existante.
 2. Aller dans `Admin`.
 3. Utiliser la zone `Uploader une image ou un PDF`.
 4. Le document est copié en local, analysé par OCR et indexé dans SQLite.
+5. Relire le texte dans le bloc `Controle OCR`.
+6. Corriger si nécessaire puis cliquer sur `Enregistrer OCR`.
 
 Le scan reste visible dans la fiche, avec son texte OCR.
 
@@ -87,3 +103,25 @@ src-tauri/target/release/bundle/
 ```
 
 Pour le POC, le lancement navigateur via `scripts/start_app.sh` reste le plus simple pour vérifier et présenter rapidement l'application.
+
+## Installation Mac à prévoir
+
+Pour un praticien sur Mac, l'objectif est de fournir une application `.app` ou un installateur `.dmg`, pas un dossier de code.
+
+Pour le POC chez le client, après avoir cloné le dépôt :
+
+```bash
+cd nutripuncture
+bash scripts/setup_mac.sh
+```
+
+Le script installe les dépendances, prépare la base et crée un lanceur `Nutripuncture Desk.command` sur le Bureau.
+
+À prévoir pour une installation propre :
+
+- construire le paquet Tauri depuis un Mac ;
+- embarquer le backend Python comme binaire ou sidecar ;
+- embarquer ou installer Tesseract avec les langues `fra` et `eng` ;
+- stocker la base SQLite et les uploads dans le dossier utilisateur de l'application ;
+- prévoir une sauvegarde simple du dossier de données ;
+- signer/notariser l'application si elle doit s'ouvrir sans alerte Gatekeeper.

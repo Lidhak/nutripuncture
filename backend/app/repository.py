@@ -299,7 +299,12 @@ def get_reference_by_id(reference_id: int, conn) -> dict | None:
         (reference_id,),
     ).fetchall()]
     documents = [dict(item) for item in conn.execute(
-        "SELECT id, filename, stored_path, mime_type, ocr_text, created_at FROM documents WHERE reference_id = ? ORDER BY created_at DESC",
+        """
+        SELECT id, filename, stored_path, mime_type, ocr_text, ocr_status, ocr_engine, created_at
+        FROM documents
+        WHERE reference_id = ?
+        ORDER BY created_at DESC
+        """,
         (reference_id,),
     ).fetchall()]
     return {
@@ -401,14 +406,22 @@ def search_references(query: str) -> list[dict]:
         return [get_reference_by_id(int(row["rowid"]), conn) for row in rows]
 
 
-def attach_document(reference_id: int | None, filename: str, stored_path: str, mime_type: str, ocr_text: str) -> int:
+def attach_document(
+    reference_id: int | None,
+    filename: str,
+    stored_path: str,
+    mime_type: str,
+    ocr_text: str,
+    ocr_status: str = "ok",
+    ocr_engine: str = "",
+) -> int:
     with get_connection() as conn:
         cursor = conn.execute(
             """
-            INSERT INTO documents(reference_id, filename, stored_path, mime_type, ocr_text)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO documents(reference_id, filename, stored_path, mime_type, ocr_text, ocr_status, ocr_engine)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (reference_id, filename, stored_path, mime_type, ocr_text),
+            (reference_id, filename, stored_path, mime_type, ocr_text, ocr_status, ocr_engine),
         )
         if reference_id:
             rebuild_fts(conn, reference_id)
@@ -429,7 +442,7 @@ def attach_document_once(reference_id: int | None, filename: str, stored_path: s
             conn.execute(
                 """
                 UPDATE documents
-                SET stored_path = ?, mime_type = ?, ocr_text = ?
+                SET stored_path = ?, mime_type = ?, ocr_text = ?, ocr_status = 'ok', ocr_engine = 'seed'
                 WHERE id = ?
                 """,
                 (stored_path, mime_type, ocr_text, doc_id),
@@ -437,8 +450,8 @@ def attach_document_once(reference_id: int | None, filename: str, stored_path: s
         else:
             cursor = conn.execute(
                 """
-                INSERT INTO documents(reference_id, filename, stored_path, mime_type, ocr_text)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO documents(reference_id, filename, stored_path, mime_type, ocr_text, ocr_status, ocr_engine)
+                VALUES (?, ?, ?, ?, ?, 'ok', 'seed')
                 """,
                 (reference_id, filename, stored_path, mime_type, ocr_text),
             )
@@ -446,3 +459,29 @@ def attach_document_once(reference_id: int | None, filename: str, stored_path: s
         if reference_id:
             rebuild_fts(conn, reference_id)
         return doc_id
+
+
+def update_document_ocr(document_id: int, ocr_text: str) -> dict | None:
+    with get_connection() as conn:
+        row = conn.execute("SELECT reference_id FROM documents WHERE id = ?", (document_id,)).fetchone()
+        if not row:
+            return None
+        conn.execute(
+            """
+            UPDATE documents
+            SET ocr_text = ?, ocr_status = 'corrected', ocr_engine = 'manual'
+            WHERE id = ?
+            """,
+            (ocr_text.strip(), document_id),
+        )
+        reference_id = row["reference_id"]
+        if reference_id:
+            rebuild_fts(conn, int(reference_id))
+        return dict(conn.execute(
+            """
+            SELECT id, reference_id, filename, stored_path, mime_type, ocr_text, ocr_status, ocr_engine, created_at
+            FROM documents
+            WHERE id = ?
+            """,
+            (document_id,),
+        ).fetchone())

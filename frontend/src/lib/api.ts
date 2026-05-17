@@ -20,7 +20,19 @@ export type DocumentItem = {
   stored_path: string;
   mime_type: string;
   ocr_text: string;
+  ocr_status: string;
+  ocr_engine: string;
   created_at: string;
+};
+
+export type UploadResult = {
+  document_id: number;
+  filename: string;
+  stored_path: string;
+  ocr_text: string;
+  ocr_status: string;
+  ocr_engine: string;
+  character_count: number;
 };
 
 export type ReferencePayload = Omit<ReferenceItem, "id" | "documents" | "match_context">;
@@ -48,9 +60,11 @@ export const api = {
     const form = new FormData();
     form.append("file", file);
     if (referenceId) form.append("reference_id", String(referenceId));
-    return request<{ document_id: number; filename: string; stored_path: string; ocr_text: string }>(
-      "/documents/upload",
-      { method: "POST", body: form },
-    );
+    return request<UploadResult>("/documents/upload", { method: "POST", body: form });
   },
+  updateOcr: (documentId: number, ocrText: string) =>
+    request<DocumentItem>(`/documents/${documentId}/ocr`, {
+      method: "PUT",
+      body: JSON.stringify({ ocr_text: ocrText }),
+    }),
 };

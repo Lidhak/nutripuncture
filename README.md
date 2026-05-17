@@ -36,7 +36,15 @@ Tout lancer en une commande:
 bash scripts/start_app.sh
 ```
 
-Puis ouvrir `http://127.0.0.1:5173`.
+Le navigateur s'ouvre automatiquement sur `http://127.0.0.1:5173`.
+
+Installer un lanceur graphique Linux:
+
+```bash
+bash scripts/create_desktop_launcher.sh
+```
+
+Le praticien peut ensuite ouvrir `Nutripuncture Desk` depuis le menu des applications, sans saisir de commande.
 
 ### Backend
 
@@ -84,7 +92,30 @@ npm run tauri:build
 
 Les artefacts sont generes dans `src-tauri/target/release/bundle/`.
 
-## OCR
+### Installation Mac
+
+Le logiciel cible un Mac en usage cabinet. Pour une livraison praticien, il faudra produire une application `.app` ou un installateur `.dmg`, construit depuis macOS.
+
+Points à prévoir :
+
+- build Tauri sur un Mac avec Xcode Command Line Tools ;
+- backend FastAPI empaqueté comme sidecar, par exemple via PyInstaller ou équivalent ;
+- Tesseract disponible localement avec les langues `fra` et `eng`, soit embarqué, soit installé via Homebrew ;
+- stockage de `nutripuncture.db` et `uploads/` dans le dossier de données utilisateur de l'app, pas dans le dossier projet ;
+- sauvegarde/restauration du dossier de données ;
+- signature et notarisation Apple pour éviter les blocages Gatekeeper hors poste de développement.
+
+Pour une démonstration technique sur Mac, l'installation minimale reste :
+
+```bash
+bash scripts/setup_mac.sh
+```
+
+Ce script installe les prérequis via Homebrew, prépare le backend/frontend, initialise la base et crée un lanceur double-clic `Nutripuncture Desk.command` sur le Bureau.
+
+Pour le praticien final, cette étape doit disparaître au profit d'un double-clic sur l'application.
+
+## OCR et controle apres import
 
 Pour l'OCR image, installer Tesseract localement:
 
@@ -92,7 +123,9 @@ Pour l'OCR image, installer Tesseract localement:
 - Ubuntu/Debian: `sudo apt install tesseract-ocr tesseract-ocr-fra`
 - Windows: installer Tesseract puis ajouter l'executable au `PATH`
 
-Sans Tesseract, l'upload fonctionne et le document est indexe avec les metadonnees disponibles. Pour les PDF, le POC extrait le texte natif via `pypdf`.
+Sans Tesseract, l'upload fonctionne et le document est indexe avec les metadonnees disponibles. Pour les PDF, le POC extrait d'abord le texte natif via `pypdf`, puis tente un OCR page par page avec PyMuPDF + Tesseract si le PDF est scanne.
+
+Apres chaque import, l'interface affiche un controle OCR: statut, moteur utilise, nombre de caracteres et texte extrait. Le praticien peut corriger le texte puis cliquer sur `Enregistrer OCR`; la correction est stockee dans SQLite et l'index de recherche est reconstruit.
 
 ## API
 
@@ -103,6 +136,7 @@ Sans Tesseract, l'upload fonctionne et le document est indexe avec les metadonne
 - `PUT /references/{id}`
 - `DELETE /references/{id}`
 - `POST /documents/upload`
+- `PUT /documents/{id}/ocr`
 - `GET /health`
 
 ## Donnees de demo

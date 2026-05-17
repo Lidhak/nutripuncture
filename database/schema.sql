@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS documents (
   stored_path TEXT NOT NULL,
   mime_type TEXT NOT NULL DEFAULT '',
   ocr_text TEXT NOT NULL DEFAULT '',
+  ocr_status TEXT NOT NULL DEFAULT 'pending',
+  ocr_engine TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(reference_id) REFERENCES "references"(id) ON DELETE SET NULL
 );

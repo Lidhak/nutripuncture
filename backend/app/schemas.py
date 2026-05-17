@@ -25,3 +25,10 @@ class UploadResponse(BaseModel):
     filename: str
     stored_path: str
     ocr_text: str
+    ocr_status: str
+    ocr_engine: str
+    character_count: int
+
+
+class DocumentOcrUpdate(BaseModel):
+    ocr_text: str = ""
