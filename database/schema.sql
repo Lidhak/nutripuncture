@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS categories (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS references (
+CREATE TABLE IF NOT EXISTS "references" (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
   category_id INTEGER,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS reference_tags (
   reference_id INTEGER NOT NULL,
   tag_id INTEGER NOT NULL,
   PRIMARY KEY(reference_id, tag_id),
-  FOREIGN KEY(reference_id) REFERENCES references(id) ON DELETE CASCADE,
+  FOREIGN KEY(reference_id) REFERENCES "references"(id) ON DELETE CASCADE,
   FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS associations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   reference_id INTEGER NOT NULL,
   label TEXT NOT NULL,
-  FOREIGN KEY(reference_id) REFERENCES references(id) ON DELETE CASCADE
+  FOREIGN KEY(reference_id) REFERENCES "references"(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS documents (
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS documents (
   mime_type TEXT NOT NULL DEFAULT '',
   ocr_text TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY(reference_id) REFERENCES references(id) ON DELETE SET NULL
+  FOREIGN KEY(reference_id) REFERENCES "references"(id) ON DELETE SET NULL
 );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS references_fts USING fts5(
@@ -59,6 +59,5 @@ CREATE VIRTUAL TABLE IF NOT EXISTS references_fts USING fts5(
   tags,
   associations,
   notes,
-  ocr_text,
-  content=''
+  ocr_text
 );

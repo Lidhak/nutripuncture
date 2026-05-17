@@ -24,6 +24,14 @@ scripts/       Lancement local
 
 ## Lancement rapide
 
+Tout lancer en une commande:
+
+```bash
+bash scripts/start_app.sh
+```
+
+Puis ouvrir `http://127.0.0.1:5173`.
+
 ### Backend
 
 ```bash
@@ -60,6 +68,15 @@ npm run tauri:dev
 ```
 
 Garder le backend lance dans un terminal separe pendant `tauri:dev`.
+
+Construire les paquets desktop Linux:
+
+```bash
+cd frontend
+npm run tauri:build
+```
+
+Les artefacts sont generes dans `src-tauri/target/release/bundle/`.
 
 ## OCR
 

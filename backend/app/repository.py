@@ -38,7 +38,7 @@ def create_reference(payload: ReferenceIn) -> dict:
         category_id = ensure_category(conn, payload.category)
         cursor = conn.execute(
             """
-            INSERT INTO references(title, category_id, description, numeric_refs, subcategories, notes)
+            INSERT INTO "references"(title, category_id, description, numeric_refs, subcategories, notes)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
@@ -59,12 +59,12 @@ def create_reference(payload: ReferenceIn) -> dict:
 
 def update_reference(reference_id: int, payload: ReferenceIn) -> dict | None:
     with get_connection() as conn:
-        if not conn.execute("SELECT id FROM references WHERE id = ?", (reference_id,)).fetchone():
+        if not conn.execute('SELECT id FROM "references" WHERE id = ?', (reference_id,)).fetchone():
             return None
         category_id = ensure_category(conn, payload.category)
         conn.execute(
             """
-            UPDATE references
+            UPDATE "references"
             SET title = ?, category_id = ?, description = ?, numeric_refs = ?,
                 subcategories = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
@@ -87,14 +87,14 @@ def update_reference(reference_id: int, payload: ReferenceIn) -> dict | None:
 
 def delete_reference(reference_id: int) -> bool:
     with get_connection() as conn:
-        cursor = conn.execute("DELETE FROM references WHERE id = ?", (reference_id,))
+        cursor = conn.execute('DELETE FROM "references" WHERE id = ?', (reference_id,))
         conn.execute("DELETE FROM references_fts WHERE rowid = ?", (reference_id,))
         return cursor.rowcount > 0
 
 
 def list_references() -> list[dict]:
     with get_connection() as conn:
-        ids = conn.execute("SELECT id FROM references ORDER BY updated_at DESC, title ASC").fetchall()
+        ids = conn.execute('SELECT id FROM "references" ORDER BY updated_at DESC, title ASC').fetchall()
         return [get_reference_by_id(int(row["id"]), conn) for row in ids]
 
 
@@ -108,7 +108,7 @@ def get_reference_by_id(reference_id: int, conn) -> dict | None:
         """
         SELECT r.id, r.title, c.name AS category, r.description, r.numeric_refs,
                r.subcategories, r.notes
-        FROM references r
+        FROM "references" r
         LEFT JOIN categories c ON c.id = r.category_id
         WHERE r.id = ?
         """,
@@ -185,7 +185,7 @@ def search_references(query: str) -> list[dict]:
         try:
             rows = conn.execute(
                 """
-                SELECT rowid, bm25(references_fts) AS score
+                SELECT rowid, bm25(references_fts, 9.0, 8.0, 4.0, 7.0, 5.0, 8.0, 2.0, 1.0, 1.0) AS score
                 FROM references_fts
                 WHERE references_fts MATCH ?
                 ORDER BY score
@@ -198,7 +198,7 @@ def search_references(query: str) -> list[dict]:
             rows = conn.execute(
                 """
                 SELECT DISTINCT r.id AS rowid
-                FROM references r
+                FROM "references" r
                 LEFT JOIN categories c ON c.id = r.category_id
                 LEFT JOIN reference_tags rt ON rt.reference_id = r.id
                 LEFT JOIN tags t ON t.id = rt.tag_id

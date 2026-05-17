@@ -8,6 +8,7 @@ backend/app/__pycache__/
 frontend/node_modules/
 frontend/dist/
 src-tauri/target/
+src-tauri/gen/
 uploads/*
 !uploads/.gitkeep
 database/*.db
