@@ -110,4 +110,15 @@ Le seed integre les fiches:
 - MOUVEMENTS ARCHETYPAUX
 - COLONNE VERTEBRALE
 
-La recherche couvre titre, categorie, references numeriques, sous-categories, associations, tags, notes et texte OCR.
+Les 4 scans du POC sont inclus dans `backend/app/fixtures/scans/`. Au seed, ils sont copies dans `uploads/`, rattaches aux fiches concernees et indexes avec une transcription OCR corrigee.
+
+La recherche couvre titre, categorie, references numeriques, sous-categories, associations, tags, notes et texte OCR. Exemples utiles:
+
+- `foie ethérique`
+- `roue iracik`
+- `plaque de Peyer`
+- `atlas-axis`
+- `fascia`
+- `sang identité`
+- `pumping out`
+- `31 17 34 09 22`

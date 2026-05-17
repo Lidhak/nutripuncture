@@ -329,6 +329,14 @@ function ReferenceView({ selected }: { selected?: ReferenceItem }) {
                   target="_blank"
                   rel="noreferrer"
                 >
+                  {doc.mime_type.startsWith("image/") && (
+                    <img
+                      className="mb-3 h-48 w-full rounded-md border border-slate-100 object-contain bg-slate-50"
+                      src={`${API_URL}${doc.stored_path}`}
+                      alt={doc.filename}
+                      loading="lazy"
+                    />
+                  )}
                   <span className="font-medium text-slate-800">{doc.filename}</span>
                   <span className="mt-1 block line-clamp-2 text-xs text-slate-500">{doc.ocr_text || "OCR sans texte extrait"}</span>
                 </a>

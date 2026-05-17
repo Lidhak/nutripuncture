@@ -57,6 +57,19 @@ def create_reference(payload: ReferenceIn) -> dict:
         return get_reference_by_id(reference_id, conn)
 
 
+def upsert_reference(payload: ReferenceIn) -> dict:
+    with get_connection() as conn:
+        row = conn.execute(
+            'SELECT id FROM "references" WHERE lower(title) = lower(?)',
+            (payload.title.strip(),),
+        ).fetchone()
+    if row:
+        item = update_reference(int(row["id"]), payload)
+        if item:
+            return item
+    return create_reference(payload)
+
+
 def update_reference(reference_id: int, payload: ReferenceIn) -> dict | None:
     with get_connection() as conn:
         if not conn.execute('SELECT id FROM "references" WHERE id = ?', (reference_id,)).fetchone():
@@ -101,6 +114,17 @@ def list_references() -> list[dict]:
 def get_reference(reference_id: int) -> dict | None:
     with get_connection() as conn:
         return get_reference_by_id(reference_id, conn)
+
+
+def get_reference_by_title(title: str) -> dict | None:
+    with get_connection() as conn:
+        row = conn.execute(
+            'SELECT id FROM "references" WHERE lower(title) = lower(?)',
+            (title.strip(),),
+        ).fetchone()
+        if not row:
+            return None
+        return get_reference_by_id(int(row["id"]), conn)
 
 
 def get_reference_by_id(reference_id: int, conn) -> dict | None:
@@ -185,13 +209,19 @@ def search_references(query: str) -> list[dict]:
         try:
             rows = conn.execute(
                 """
-                SELECT rowid, bm25(references_fts, 9.0, 8.0, 4.0, 7.0, 5.0, 8.0, 2.0, 1.0, 1.0) AS score
+                SELECT
+                  rowid,
+                  bm25(references_fts, 9.0, 8.0, 4.0, 7.0, 5.0, 8.0, 2.0, 1.0, 1.0) AS score,
+                  (
+                    title || ' ' || category || ' ' || description || ' ' || numeric_refs || ' ' ||
+                    subcategories || ' ' || tags || ' ' || associations || ' ' || notes || ' ' || ocr_text
+                  ) LIKE ? AS exact_match
                 FROM references_fts
                 WHERE references_fts MATCH ?
-                ORDER BY score
+                ORDER BY exact_match DESC, score
                 LIMIT 50
                 """,
-                (fts_query,),
+                (f"%{q}%", fts_query),
             ).fetchall()
         except Exception:
             like = f"%{q}%"
@@ -224,3 +254,36 @@ def attach_document(reference_id: int | None, filename: str, stored_path: str, m
         if reference_id:
             rebuild_fts(conn, reference_id)
         return int(cursor.lastrowid)
+
+
+def attach_document_once(reference_id: int | None, filename: str, stored_path: str, mime_type: str, ocr_text: str) -> int:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT id FROM documents
+            WHERE reference_id IS ? AND filename = ?
+            """,
+            (reference_id, filename),
+        ).fetchone()
+        if row:
+            doc_id = int(row["id"])
+            conn.execute(
+                """
+                UPDATE documents
+                SET stored_path = ?, mime_type = ?, ocr_text = ?
+                WHERE id = ?
+                """,
+                (stored_path, mime_type, ocr_text, doc_id),
+            )
+        else:
+            cursor = conn.execute(
+                """
+                INSERT INTO documents(reference_id, filename, stored_path, mime_type, ocr_text)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (reference_id, filename, stored_path, mime_type, ocr_text),
+            )
+            doc_id = int(cursor.lastrowid)
+        if reference_id:
+            rebuild_fts(conn, reference_id)
+        return doc_id
